@@ -1,0 +1,28 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile (
+            'com.amazonaws:aws-lambda-java-core:1.2.0',
+            'com.amazonaws:aws-lambda-java-events:2.2.6'
+    )
+}
+task buildPythonEnv(type:Exec){
+    workingDir './python'
+    commandLine 'cd'
+    commandLine 'pip', 'install', '-r','./requirements.txt', '--target', './'
+}
+task buildZip(type: Zip) {
+    from compileJava
+    from processResources
+    into('lib') {
+        from configurations.runtimeClasspath
+    }
+    from 'python/'
+
+}
+buildZip.dependsOn buildPythonEnv
+build.dependsOn buildZip
